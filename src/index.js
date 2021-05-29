@@ -2,7 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Register from './Register/Register';
 import Registers from './Registers/Registers';
+import Registry from './Registry/Registry';
 import Navbar from './Navbar/Navbar';
+import Home from './Home/Home';
+import GenerateLink from './GenerateLink/GenerateLink';
 import {
   BrowserRouter as Router,
   Switch,
@@ -17,8 +20,20 @@ ReactDOM.render(
           <Navbar />
           <Registers />
         </Route>
+        <Route path="/registro/:id">
+          <Navbar />
+          <Registry />
+        </Route>
         <Route path="/:name/registrar">
           <Register />
+        </Route>
+        <Route path="/generateLink">
+          <Navbar />
+          <GenerateLink />
+        </Route>
+        <Route path="/">
+          <Navbar />
+          <Home />
         </Route>
       </Switch>
     </div>

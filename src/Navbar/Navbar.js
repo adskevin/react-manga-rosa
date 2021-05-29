@@ -6,12 +6,14 @@ function Navbar() {
   return (
     <nav className="navbar" role="navigation" aria-label="main navigation">
       <div className="navbar-brand">
+        <a href="/">
           <img alt="Manga Rosa Logo" src={ logo } width="200" />
+        </a>
       </div>
     
       <div id="navbarBasicExample" className="navbar-end">
         <Link className="navbar-item" to="/registros">Registros</Link>
-        <Link className="navbar-item" to="/">Gerar link de convite</Link>
+        <Link className="navbar-item" to="/generateLink">Gerar link de convite</Link>
       </div>
     </nav>
   );
