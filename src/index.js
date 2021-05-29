@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Register from './Register/Register';
-// import Registers from './Registers/Registers';
+import Registers from './Registers/Registers';
 import Navbar from './Navbar/Navbar';
 import {
   BrowserRouter as Router,
@@ -15,7 +15,7 @@ ReactDOM.render(
       <Switch>
         <Route path="/registros">
           <Navbar />
-          {/* <Registers /> */}
+          <Registers />
         </Route>
         <Route path="/:name/registrar">
           <Register />
