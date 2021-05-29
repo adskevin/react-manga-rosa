@@ -13,7 +13,7 @@ function Register() {
   const [cpfInvalid, setCpfInvalid] = useState(false);
 
   const [email, setEmail] = useState('');
-  const [emailInvalid, setEmaiInvalid] = useState(true);
+  const [emailInvalid, setEmaiInvalid] = useState(false);
 
   const [name, setName] = useState(filterName(params.name));
 
@@ -23,6 +23,8 @@ function Register() {
   const [acquirements, setAcquirements] = useState([]);
   const [activeAcquirements, setActiveAcquirements] = useState([]);
   const [acquirementsValid, setAcquirementsValid] = useState(true);
+
+  const [sendAllowed, setSendAllowed] = useState(false);
 
   function cpfHandler(e) {
     let value = e.target.value;
@@ -52,7 +54,7 @@ function Register() {
       return;
     }
     let isEmailValid = emailValidator.validate(value);
-    setEmaiInvalid(isEmailValid);
+    setEmaiInvalid(!isEmailValid);
   }
 
   function nameHandler(e) {
@@ -65,19 +67,19 @@ function Register() {
 
   function phoneHandler(e) {
     let value = e.target.value;
-    if (value.slice(-1) !== '_') {
-      setPhoneInvalid(false);
+    if (value.slice(-1) === '_') {
+      setPhoneInvalid(true);
     }
     setPhone(value);
   }
 
   function validatePhone(e) {
     let value = e.target.value;
-    if (value.slice(-1) !== '_') {
+    if (value.slice(-1) === '_') {
+      setPhoneInvalid(true);
+    } else {
       setPhoneInvalid(false);
-      return;
     }
-    setPhoneInvalid(true);
   }
 
   function filterName(name) {
@@ -96,7 +98,7 @@ function Register() {
 
   useEffect(() => {
     fetchAcquirements();
-  }, []);
+  }, [acquirementsValid, sendAllowed, phoneInvalid, emailInvalid, cpfInvalid]);
 
   function placeAcquirements() {
     if (acquirements.length === 0) {
@@ -106,7 +108,7 @@ function Register() {
       return (
         <div key={ element.id }>
           <label className="checkbox">
-            <input type="checkbox" value={ element.nome } />
+            <input type="checkbox" value={ element.nome } onChange={ handleAcquirementChange } />
             { ' ' + element.nome }
           </label>
         </div>
@@ -114,7 +116,32 @@ function Register() {
     });
   }
 
-  function handleFormChange(e) {
+  function checkFields() {
+    let allowed = true;
+    if (cpfInvalid || cpf.length === 0) {
+      console.log('cpf error');
+      allowed = false;
+    }
+    if (emailInvalid || email.length === 0) {
+      console.log('email error');
+      allowed = false;
+    }
+    if (name < 3) {
+      console.log('name error');
+      allowed = false;
+    }
+    if (phoneInvalid || phone.length === 0) {
+      console.log('phone error');
+      allowed = false;
+    }
+    if (!acquirementsValid) {
+      console.log('acquirements error');
+      allowed = false;
+    }
+    setSendAllowed(allowed);
+  }
+
+  function handleAcquirementChange(e) {
     const newActiveAcquirement = activeAcquirements;
     const indexOf = newActiveAcquirement.indexOf(e.target.value);
     if (indexOf === -1) {
@@ -123,18 +150,40 @@ function Register() {
       newActiveAcquirement.splice(newActiveAcquirement.indexOf(indexOf), 1);
     }
     if (newActiveAcquirement.length > 3 || newActiveAcquirement.length < 1) {
+      console.log('erro');
       setAcquirementsValid(false);
     } else {
       setAcquirementsValid(true);
     }
     setActiveAcquirements(newActiveAcquirement);
+    checkFields();
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    console.log('send');
+    let data = {
+      nome: name,
+      email: email,
+      cpf: cpf,
+      celular: phone,
+      conhecimentos: activeAcquirements.join(', '),
+    }
+    console.log(data);
+    axios.post('http://localhost:3001/users', data)
+      .then(() => {
+        window.location('http://localhost:3001');
+      })
+      .catch((error) => {
+        console.log(error);
+      })
   }
 
   return (
     <section>
 
-      <form className="box" onChange={ handleFormChange }>
-        <div className="field">
+      <form className="box" onSubmit={ handleSubmit }>
+        <div className="field"> 
           <label className="label">Nome *</label>
           <div className="control">
             <input className="input" type="text" onChange={ nameHandler } value={ name } />
@@ -144,8 +193,8 @@ function Register() {
         <div className="field">
           <label className="label">Email *</label>
           <div className="control">
-            <input className={ emailInvalid ? "input" : "input is-danger"} type="email" placeholder="e.g. alex@example.com" onChange={ emailHandler } onBlur={ validateEmail } value={ email }/>
-            { emailInvalid ? "" : <p className="help is-danger">Email inválido</p> }
+            <input className={ emailInvalid ? "input is-danger" : "input" } type="email" placeholder="e.g. alex@example.com" onChange={ emailHandler } onBlur={ validateEmail } value={ email }/>
+            { emailInvalid ? <p className="help is-danger">Email inválido</p> : "" }
           </div>
         </div>
 
@@ -171,7 +220,7 @@ function Register() {
           { placeAcquirements() }
         </div>
 
-        <button className="button is-primary is-static">Cadastrar</button>
+        <button className={ sendAllowed ? "button is-primary" : "button is-primary is-static" } >Cadastrar</button>
       </form>
     </section>
   );
